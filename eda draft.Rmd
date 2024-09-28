@@ -1,0 +1,299 @@
+---
+title: "Assignment 4: Capital Bikeshare"
+author: "Jacquelyn Yeboah"
+date: "`09/16/2024`"
+documentclass: article
+geometry: margin=1in
+fontsize: 11pt
+output:
+  pdf_document:
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    dev: pdf
+    highlight: tango
+  html_document:
+    theme: default
+    self_contained: true
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    smart: true
+    dev: svg
+---
+<!-- Write your Markdown below this line -->
+
+## Exercise 1
+i. start_lng and end_lng
+
+ii. rideable_type and member_casual
+
+iii. each row in the dataset represents a single bike ride.
+
+## Exercise 2
+```{r}
+library(dplyr)
+
+bikeshare <- bikeshare %>%
+  mutate(
+    duration = as.numeric(difftime(ended_at, started_at, units = "secs"))
+  ) 
+
+```
+
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_point(aes(x = duration, y = min_distance)) +
+  labs(
+    title = "Scatter plot of Min Distance vs Duration",
+    x = "Duration (seconds)",
+    y = "Min Distance"
+  )
+
+```
+
+```{r}
+summary(bikeshare$duration)
+mean(bikeshare$duration)  # To calculate the mean duration
+median(bikeshare$duration)  # To calculate the median duration
+
+```
+
+## Exercise 3
+```{r}
+bikeshare %>%
+  ggplot () +
+  geom_histogram(mapping = aes(started_at)) +
+    labs (duration  = "...", started_at = "...")
+```
+
+## Exercise 4
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(y = duration)) +
+  labs(title = "Box Plot of Trip Duration", y = "Duration (seconds)")
+```
+## Exercise 5
+```{r}
+library(ggplot2)
+
+# Sample data
+data <- data.frame(
+  group = rep(c("A", "B", "C"), each = 100),
+  value = c(rnorm(100), rnorm(100, mean = 2), rnorm(100, mean = 1.5))
+)
+
+# Create a violin plot
+ggplot(data, aes(x = group, y = value)) +
+  geom_violin()
+
+```
+```{r}
+library(ggplot2)
+
+# Create a violin plot
+ggplot(bikeshare, aes(x = "start_lat", y = x)) +
+  geom_violin() +
+  xlab("")
+
+```
+
+Chat GPT was used to modify a violin plot, generated for this exercise.
+## Exercise 6
+```{r}
+bikeshare <- bikeshare %>%
+  mutate(
+    min_distance = distHaversine(
+      cbind(start_lng, start_lat), 
+      cbind(end_lng, end_lat)
+      )
+      )
+
+```
+
+
+## Exercise 7
+```{r}
+library(ggplot2)
+
+# Histogram
+ggplot(bikeshare, aes(x = min_distance)) +
+  geom_histogram(binwidth = 500, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Minimum Distance", x = "Minimum Distance (meters)", y = "Count") +
+  theme_minimal()
+
+```
+
+```{r}
+# Box plot
+ggplot(bikeshare, aes(x = "duration", y = min_distance)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  labs(title = "Box Plot of Minimum Distance", y = "Minimum Distance (meters)") +
+  theme_minimal()
+
+```
+
+```{r}
+# Violin plot
+ggplot(bikeshare, aes(x = "duration", y = min_distance)) +
+  geom_violin(fill = "red", color = "black") +
+  labs(title = "Violin Plot of Minimum Distance", y = "Minimum Distance (meters)") +
+  theme_minimal()
+
+``` 
+
+## Exercise 8
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_point(aes(x = "duration", y = "min_distance")) +
+  labs(
+    title = "bikeshare",
+    x = "duration",
+    y = "min_distance"
+  )
+
+```
+
+```{r}
+bikeshare %>%
+  ggplot(aes(x = duration, y = min_distance)) +
+  geom_point(alpha = 0.5, color = "blue") + # Adjust transparency and color
+  labs(
+    title = "Covariation between Duration and Minimum Distance",
+    x = "Duration (minutes)", # Adjust label as needed
+    y = "Minimum Distance (km)" # Adjust label as needed
+  ) +
+  theme_minimal() # Optional: Apply a clean theme
+
+```
+
+```{r}
+bikeshare %>%
+# Example data (assuming 'duration' and 'distance' are the variables in question)
+ggplot() +
+  geom_bin2d (data = bikeshare_data, aes(x = "duration", y = "distance",(alpha = 0.3))) +
+  labs(title = "2D Histogram of Rides", x = "Duration", y = "Distance")
+``` 
+
+```{r}
+bikeshare %>%
+  ggplot(aes(x = duration, y = min_distance)) +
+  geom_point(alpha = 0.01, color = "blue") + # Set alpha to 0.01 for higher transparency
+  labs(
+    title = "Covariation between Duration and Minimum Distance",
+    x = "Duration (minutes)",
+    y = "Minimum Distance (km)"
+  ) +
+  theme_minimal()
+
+``` 
+
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_point(aes(x = duration, y = min_distance)) +
+  labs(
+    title = "Scatter Plot of Min Distance vs Duration",
+    x = "Duration",
+    y = "Min Distance"
+  )
+
+```
+
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_point(aes(x = duration, y = min_distance), alpha = 0.01) +
+  labs(
+    title = "Scatter Plot of Min Distance vs Duration (with Transparency)",
+    x = "Duration",
+    y = "Min Distance"
+  )
+
+``` 
+## Exercise 9
+```{r}
+bikeshare %>%
+  summarize(
+      mean = mean(duration),
+      median = median(duration),
+      standard_deviation = sd(duration),
+      minimum = min(duration),
+      maximum = max(duration)
+  )
+```
+
+```{r}
+bikeshare %>%
+  group_by(member_casual) %>%
+  summarize(
+    mean = mean(duration),
+    median = median(duration),
+    standard_deviation = sd(duration),
+    minimum = min(duration),
+    maximum = max(duration)
+  )
+
+```
+
+```{r}
+bikeshare %>%
+  group_by(member_casual) %>%
+  summarize(
+    n = n()
+  )
+```
+## Exercise 10
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = duration, fill = member_casual),
+                 bins = 20, alpha = 0.3, position = "identity") +
+  labs(title = "Ride Duration by Member Type", x = "Duration (seconds)", y = "Count")
+```
+
+```{r}
+bikeshare %>%
+  ggplot () +
+  geom_violin(mapping = aes (x = member_casual, y = duration)) +
+  labs(title = "Violin Plot of the Ride Duration by Member Type", y = "Duration (seconds)")
+```
+
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_bin2d(mapping = aes(x = duration, y = min_distance)) +
+  scale_fill_viridis_c(trans = "log") +
+  facet_wrap(~ member_casual) +
+  labs(title = "Heatmap of the Duration versus Minimum Distance by Member Type")
+```
+
+## Exercise 11
+```{r}
+bikeshare %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = duration, fill = member_casual),
+                 bins = 20, alpha = 0.3, position = "identity") +
+  scale_fill_manual(values = c("brown", "blue")) + #custom colors
+  labs(title = "Ride Duration by Member Type",
+       x = "Duration (log-scaled seconds)",
+       y = "Count",
+       fill = "Rider Type") +
+  theme_minimal()
+  
+```
+My Interpretation: 
+According to the data shown, casual riders had a higher number of long duration rides versus member riders. Casual riders also take more leisured rides for recreation, compared to the member riders, who take shorter rides.
+
+## Academic Integrity statement
+
+ChatGPT was used to help complete this assignment in accordance with the AI policies in the syllabus.I also referred to GPT for an example on how to complete Exercise 11.
+
+https://chat.openai.com/share/12e3c048-3b36-4c98-b191-d00313dea219 
+https://chatgpt.com/share/66ef093c-68b0-800d-aca9-e2a0f07e2865 
+
