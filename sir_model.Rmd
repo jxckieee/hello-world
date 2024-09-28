@@ -1,0 +1,354 @@
+---
+title: "Assignment 5: Modeling COVID-19"
+author: "Jacquelyn Yeboah"
+date: "09/22/2024"
+documentclass: article
+geometry: margin=1in
+fontsize: 11pt
+output:
+  pdf_document:
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    dev: pdf
+    highlight: tango
+  html_document:
+    theme: default
+    self_contained: true
+    toc: false
+    df_print: kable
+    fig_caption: false
+    number_sections: false
+    smart: true
+    dev: svg
+---
+
+```{r setup, include = FALSE, echo=FALSE}
+# DO NOT ALTER THIS CHUNK
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  fig.width = 5,
+  fig.asp = 0.618,
+  dpi = 120,
+  fig.align = "center",
+  cache = FALSE
+)
+# Load required packages
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(scales))
+covid_real <- read_csv("covid_counts.csv")
+```
+
+SIR stands for:
+
+Susceptible (the number of people who can still catch the disease)
+Infectious (the number of people who have currently got the disease, and can spread it to susceptible people)
+Recovered (the number of people who have recovered from the disease, and who are immune to reinfection)
+
+
+```{r}
+balance_on_day_2 <- 1000 + 0.01 * 1000
+```
+
+```{r}
+bank_balance = 1000
+
+for(day in 2:365){
+  bank_balance[day] <- bank_balance[day - 1] + 0.01 * bank_balance[day - 1]
+}
+```
+
+## Exercise 1
+```{r}
+days_range <- 1:250
+
+print(days_range)
+```
+
+
+## Exercise 2
+```{r}
+susceptible <- 1:300000000  #3*10^8 susceptible to the disease
+
+print(susceptible)
+```
+
+```{r}
+infectious <- 1:1 #1 person is infectious
+
+print(infectious)
+```
+
+```{r}
+recovered <- 0 # no recoveries yet
+
+print(recovered)
+```
+
+
+## Exercise 3
+
+```{r}
+beta <- 0.25
+gamma <- 0.125
+N  <- 300000001
+for (day in 2:250){
+susceptible[day] <- susceptible[day-1] - (beta * susceptible[day-1] * infectious[day-1]) / N
+}
+```
+
+```{r}
+  for(day in 2:250){
+    
+      susceptible[day-1] <-300000001
+      infectious[day-1] <- 1
+      recovered [day-1] <- 0
+}
+```
+
+```{r}
+beta <- 0.25
+gamma <- 0.125
+N <- 300000001
+
+#Results from day one
+susceptible <- c(300000000)
+infectious <- c(1)
+recovered <- c(0)
+
+# Loop through day 2 to day 250
+for(day in 2:250){
+  #Formula to calculate number of susceptible, infectious, and recovered individuals
+  new_infections <- (beta*susceptible[day-1]* infectious[day-1]) / N
+  new_recoveries <- gamma*infectious[day-1]
+  
+  susceptible[day] <- susceptible[day - 1] - new_infections
+  infectious[day] <- infectious[day - 1] + new_infections - new_recoveries
+  recovered[day] <- recovered[day - 1] + new_recoveries
+  }
+
+#Print the results:
+tail(susceptible)
+tail(infectious)
+tail(recovered)
+```
+
+## Exercise 4
+```{r}
+
+#load library
+library(tibble)
+
+#days range vector:
+days_range <- 1:250
+
+#combining the vectors into a tibble:
+covid_sim <- tibble(
+  day = days_range,
+  susceptible = susceptible,
+  infectious = infectious,
+  recovered = recovered
+)
+  
+```
+
+## Exercise 5
+```{r}
+read.csv("https://www.dropbox.com/scl/fi/a1w0hs834k9qtq8qgvbci/covidSim.csv?rlkey=8o4scy7hznfw2p5o1mtfpazpg&st=55ooo2ll&dl=1") -> covid_sim
+covid_sim <- covid_sim[,2:5]
+```
+
+```{r}
+# Load libraries
+library(ggplot2)
+library(tidyr)
+
+# Reshape the dataframe into tidy format
+
+  covid_sim %>%
+  pivot_longer (cols = c(susceptible, infectious, recovered),
+                names_to = "status",
+                values_to = "count")
+
+# View first few rows of the reshaped data
+head(covid_sim)
+
+ggplot() +
+  geom_line(aes(x = day, y = c(susceptible, infectious, recovered))) +
+  labs(
+    title = "Simulated COVID-19 cases from SIR model",
+    x = "Days in the USA",
+    y = "Number of People",
+    color = "case types") + 
+    
+  theme_minimal ()
+```
+## Exercise 6
+```{r}
+library(ggplot2)
+
+# Plot Line Graph
+ggplot() +
+  geom_line(data = covid_sim, aes(x = days_range, y = infectious, color = "Simulated Cases"), size = 1) + # Simulated Cases
+  geom_line(data = covid_real, aes(x = days_in_country, y = current_cases, color = "Real Cases"), size = 1) + # Real Cases
+  labs(
+    title = "Comparison of Simulated and Real COVID-19 Cases over time",
+       x = "Days",
+       y = "Number of Cases",
+       color = "case types") + # Label for the legend
+  theme_minimal ()
+
+```
+
+## Exercise 7
+```{r}
+library(ggplot2)
+
+# Plot Line Graph
+ggplot() +
+  geom_line(data = covid_sim, aes(x = days_range, y = infectious, color = "Simulated Cases"), size = 1) + # Simulated Cases
+  geom_line(data = covid_real, aes(x = days_in_country, y = current_cases, color = "Real Cases"), size = 1) + # Real Cases
+  labs(
+    title = "Comparison of Simulated and Real COVID-19 Cases over time",
+       x = "Days",
+       y = "Number of Cases",
+       color = "case types") + # Label for the legend
+  theme_minimal ()
+
+scale_x_log10(labels=trans_format('log10', math_format(10^.y)))
+scale_y_log10(labels=trans_format('log10', math_format(10^.x)))
+
+```
+
+## Exercise 8
+
+codes from exercises 1-4
+
+```{r}
+infectious <- 1:1 #1 person is infectious
+
+print(infectious)
+```
+
+```{r}
+recovered <- 0 # no recoveries yet
+
+print(recovered)
+```
+
+```{r}
+beta_values <- seq(0.125, 0.5, by=0.025)
+gamma <- 0.125
+N  <- 300000001
+for (day in 2:250){
+susceptible[day] <- susceptible[day-1] - (beta * susceptible[day-1] * infectious[day-1]) / N
+}
+```
+
+```{r}
+  for(day in 2:250){
+    
+      susceptible[day-1] <-300000001
+      infectious[day-1] <- 1
+      recovered [day-1] <- 0
+}
+```
+
+```{r}
+# Define a range of beta values to test
+beta_values <- seq(0.125, 0.5, by=0.025)
+gamma <- 0.125
+N <- 300000001
+
+#Results from day one
+susceptible <- c(300000000)
+infectious <- c(1)
+recovered <- c(0)
+
+# Loop through day 2 to day 250
+for(day in 2:250){
+  #Formula to calculate number of susceptible, infectious, and recovered individuals
+  new_infections <- (beta*susceptible[day-1]* infectious[day-1]) / N
+  new_recoveries <- gamma*infectious[day-1]
+  
+  susceptible[day] <- susceptible[day - 1] - new_infections
+  infectious[day] <- infectious[day - 1] + new_infections - new_recoveries
+  recovered[day] <- recovered[day - 1] + new_recoveries
+  }
+
+#Print the results:
+tail(susceptible)
+tail(infectious)
+tail(recovered)
+```
+
+```{r}
+
+#load library
+library(tibble)
+
+#days range vector:
+days_range <- 1:250
+
+#combining the vectors into a tibble:
+covid_sim <- tibble(
+  day = days_range,
+  susceptible = susceptible,
+  infectious = infectious,
+  recovered = recovered
+)
+  
+```
+
+code from exercise 7
+```{r}
+
+library(ggplot2)
+
+# Plot Line Graph
+ggplot() +
+  geom_line(data = covid_sim, aes(x = days_range, y = infectious, color = "Simulated Cases"), size = 1) + # Simulated Cases
+  geom_line(data = covid_real, aes(x = days_in_country, y = current_cases, color = "Real Cases"), size = 1) + # Real Cases
+  labs(
+    title = "Comparison of Simulated and Real COVID-19 Cases over time",
+       x = "Days",
+       y = "Number of Cases",
+       color = "case types") + # Label for the legend
+  theme_minimal ()
+
+scale_x_log10(labels=trans_format('log10', math_format(10^.y)))
+scale_y_log10(labels=trans_format('log10', math_format(10^.x)))
+```
+```{r}
+days_range <- 1:250
+
+print(days_range)
+```
+
+```{r}
+susceptible <- 1:300000000  #3*10^8 susceptible to the disease
+
+print(susceptible)
+```
+
+```{r}
+# Setup initial values for SIR Model Parameters
+
+N <- 1000000 # Total population
+I <- 1 # Initial number of infected individuals
+R <- 0 # Initial number of recovered individuals
+s <- N - I - R # Initial number of susceptible individuals
+gamma <- 0.1 # Recovery rate 
+
+# Beta Values to test
+beta_values <- seq(0.125, 0.5, by=0.025) # Testing beta between values
+
+```
+
+## Academic Integrity statement
+I have used Chat GPT to assist me in Exercise 4,5 and 6. I have not copied directly from the app, however, here are my interactions with GPT:
+
+
+
