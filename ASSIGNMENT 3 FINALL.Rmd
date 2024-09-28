@@ -1,0 +1,145 @@
+---
+title: "ASSIGNMENT 3 FINAL"
+author: "jxckieee"
+date: "2024-09-12"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+title: "ASSIGNMENT 3 FINAL"
+author: "jxckieee"
+date: "2024-09-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+view(flights)
+?flights
+
+<!-- Write your Markdown below this line -->
+
+flights_of_new_york.Rmd
+
+##Exercise 1
+
+i.  336776 entries, 19 columns
+
+ii. flight number
+
+iii.arrival time is later than scheduled arrival time
+
+iv. carrier, origin
+
+##Exercise 2
+
+```{r}
+flights %>%
+  select(year, month) 
+```  
+```{r}
+flights%>%
+  select(year:day)
+```
+##Exercise 3
+
+```{r}
+flights %>%
+  arrange(air_time, distance)
+```
+##Exercise 4
+
+```{r}
+flights %>%
+  arrange(air_time, distance) 
+```
+##Exercise 5 
+
+```{r}
+flights%>%
+  arrange(desc(month))
+```
+##Exercise 6
+
+```{r}
+flights%>%
+  mutate(
+    average_speed = distance / (air_time / 60)
+  )
+```
+new  column: average_speed
+
+##Exercise 7
+
+```{r}
+flights%>%
+  mutate(
+    dep_time_hour = dep_time %/% 100,
+    dep_time_minute = dep_time %% 100
+  )
+```
+```{r}
+flights%>%
+  mutate(
+    dep_time_hour = dep_time %/% 100,
+    dep_time_minute = dep_time %% 100,
+    dep_time_minutes_midnight = (dep_time_hour * 60) + dep_time_minute
+  )
+```
+
+##Exercise 8
+
+```{r}
+flights%>%
+  filter(
+    arr_delay < 0
+  )
+```
+
+```{r}
+flights%>%
+  filter(
+    carrier == "AA"
+  )
+```
+##Exercise 9
+
+```{r}
+flights%>%
+  group_by(carrier) %>%
+  summarize(
+    average_arr_delay = mean(arr_delay, na.rm = TRUE)
+  )
+```
+
+##Exercise 10
+
+```{r}
+x <- 2
+x <- 2 + 2
+flights_to_miami <- flights %>%
+  filter(dest == "MIA")
+```
+
+##Exercise 11
+
+```{r}
+monthly_delays <- flights %>%
+  group_by(month, carrier) %>%
+  summarize(
+    arrival_delay = mean(arr_delay, na.rm = TRUE), 
+    .groups = "drop"
+  ) %>%
+  spread(carrier, arrival_delay) %>%
+  select(-`9E`)
+```
+
+```{r}
+qplot(x = month, y = UA, geom="line", data=monthly_delays)
+```
+```{r}
+monthly_delays %>%
+  pivot_longer(cols = AA:YV, names_to = "airlines", values_to = "delays")
+```
